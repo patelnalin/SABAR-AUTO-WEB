@@ -1,0 +1,97 @@
+
+"use server";
+
+import { z } from "zod";
+import { vehicleStockSchema } from "./schema";
+
+const MOCK_STOCK: z.infer<typeof vehicleStockSchema>[] = [
+  {
+    id: "stk-001",
+    creationDate: new Date("2024-07-10"),
+    poNumber: "PO-2024-001",
+    poInvoiceDate: new Date("2024-07-10"),
+    modelCode: "BJ-PNS200",
+    modelName: "Pulsar NS200",
+    colorCode: "#FF0000",
+    color: "Red",
+    poInvoiceNo: "INV-2024-07-001",
+    chassisNo: "CHNS200R001",
+    engineNo: "ENNS200R001",
+    status: "In Stock",
+    batteryNo: "BAT-R001",
+    supplierName: "Reliable Auto Parts",
+    cost: 140000,
+  },
+  {
+    id: "stk-002",
+    creationDate: new Date("2024-07-11"),
+    poNumber: "PO-2024-001",
+    poInvoiceDate: new Date("2024-07-10"),
+    modelCode: "BJ-D400",
+    modelName: "Dominar 400",
+    colorCode: "#00FF00",
+    color: "Green",
+    poInvoiceNo: "INV-2024-07-001",
+    chassisNo: "CHD400G001",
+    engineNo: "END400G001",
+    status: "Sold",
+    batteryNo: "BAT-G001",
+    supplierName: "Reliable Auto Parts",
+    cost: 230000,
+  },
+   {
+    id: "stk-003",
+    creationDate: new Date("2024-07-16"),
+    poNumber: "PO-2024-002",
+    poInvoiceDate: new Date("2024-07-15"),
+    modelCode: "BJ-CETAK",
+    modelName: "Chetak",
+    colorCode: "#FFFFFF",
+    color: "White",
+    poInvoiceNo: "INV-2024-07-002",
+    chassisNo: "CHCETAKW001",
+    engineNo: "ENCETAKW001",
+    status: "In Stock",
+    batteryNo: "BAT-W001-EV",
+    supplierName: "Bharat Tyres",
+    cost: 150000,
+  },
+  {
+    id: "stk-004",
+    creationDate: new Date("2024-07-21"),
+    poNumber: "PO-2024-003",
+    poInvoiceDate: new Date("2024-07-20"),
+    modelCode: "HN-H2.0",
+    modelName: "Hornet 2.0",
+    colorCode: "#000000",
+    color: "Matte Black",
+    poInvoiceNo: "INV-2024-07-003",
+    chassisNo: "CHH20MB001",
+    engineNo: "ENH20MB001",
+    status: "Reserved",
+    batteryNo: "BAT-MB001",
+    supplierName: "Engine Masters",
+    cost: 135000,
+  },
+  {
+    id: "stk-005",
+    creationDate: new Date("2024-07-23"),
+    poNumber: "PO-2024-006",
+    poInvoiceDate: new Date("2024-07-23"),
+    modelCode: "BJ-P150",
+    modelName: "Pulsar 150",
+    colorCode: "#0000FF",
+    color: "Blue",
+    poInvoiceNo: "INV-2024-07-004",
+    chassisNo: "CHP150B001",
+    engineNo: "ENP150B001",
+    status: "In Transit",
+    batteryNo: "BAT-B001",
+    supplierName: "Deco Accessories",
+    cost: 110000,
+  }
+];
+
+export async function getStock() {
+  return Promise.resolve(MOCK_STOCK);
+}

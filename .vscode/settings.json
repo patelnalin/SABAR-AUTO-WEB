@@ -1,0 +1,6 @@
+{
+    "git.blame.editorDecoration.enabled": true,
+    "terminal.integrated.allowChords": false,
+    "explorer.excludeGitIgnore": false,
+    "github-enterprise.uri": ""
+}
