@@ -30,16 +30,8 @@ import {
   LayoutGrid,
   LogOut,
   Home,
-  FileQuestion,
-  ShoppingCart,
-  Car,
-  ShieldCheck,
-  Receipt,
-  MapPin,
-  Building2,
-  HeartPulse,
-  Landmark,
-  Package
+  User,
+  Settings,
 } from "lucide-react";
 
 export default function Header() {
@@ -171,6 +163,13 @@ export default function Header() {
                   </p>
                 </div>
               </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/profile"><User className="w-4 h-4 mr-2" />Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings"><Settings className="w-4 h-4 mr-2" />Settings</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/">
