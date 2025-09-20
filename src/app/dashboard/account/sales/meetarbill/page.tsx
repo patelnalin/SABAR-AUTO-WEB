@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { MOCK_BILLS } from "./actions";
+import { MOCK_BILLS } from "./data";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 
