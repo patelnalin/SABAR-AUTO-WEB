@@ -12,7 +12,8 @@ import {
   useReactTable,
   ColumnFiltersState,
   getFilteredRowModel,
-  RowSelectionState,
+  RowData,
+  RowSelectionState
 } from "@tanstack/react-table";
 
 import {
@@ -34,6 +35,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Company } from "./columns";
+
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    deleteRow: (id: string) => void;
+  }
+}
 
 
 interface DataTableProps<TData, TValue> {
@@ -41,17 +50,30 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends Company, TValue>({
   columns,
-  data,
+  data: initialData,
 }: DataTableProps<TData, TValue>) {
+  const [data, setData] = React.useState(initialData);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
+   React.useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
+  const tableMeta = React.useMemo(() => ({
+    deleteRow: (id: string) => {
+        setData(prev => prev.filter(row => row.id !== id));
+    },
+  }), []);
+
+
   const table = useReactTable({
     data,
     columns,
+    meta: tableMeta,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,

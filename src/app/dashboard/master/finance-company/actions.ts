@@ -14,6 +14,12 @@ export async function getFinanceCompanies() {
   });
 }
 
+export async function getFinanceCompanyById(id: string) {
+    return await prisma.financeCompany.findUnique({
+      where: { id }
+    });
+}
+
 export async function addFinanceCompany(
   data: z.infer<typeof financeCompanySchema>
 ) {

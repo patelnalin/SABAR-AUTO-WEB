@@ -18,6 +18,7 @@ import { deleteInsuranceCompany } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import { Edit, Trash } from "lucide-react";
 import { InsuranceCompany } from "./columns";
+import { useRouter } from "next/navigation";
 
 
 interface DataTableRowActionsProps {
@@ -30,9 +31,10 @@ export function DataTableRowActions({
     deleteRow
 }: DataTableRowActionsProps) {
     const { toast } = useToast();
+    const router = useRouter();
 
     const handleEdit = () => {
-        toast({ title: "Info", description: "Editing would be handled on a separate page, similar to the 'Add' flow."});
+        router.push(`/dashboard/master/insurance-company/edit/${row.original.id}`);
     }
 
     const handleDelete = async () => {

@@ -2,6 +2,7 @@
 "use client";
 
 import { Row } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     AlertDialog,
@@ -14,15 +15,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteFinanceCompany } from "./actions";
+import { deleteCompany } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import { Edit, Trash } from "lucide-react";
-import { FinanceCompany } from "./columns";
-import { useRouter } from "next/navigation";
+import { Company } from "./columns";
 
 
 interface DataTableRowActionsProps {
-    row: Row<FinanceCompany>;
+    row: Row<Company>;
     deleteRow: (id: string) => void;
 }
 
@@ -34,11 +34,11 @@ export function DataTableRowActions({
     const router = useRouter();
 
     const handleEdit = () => {
-        router.push(`/dashboard/master/finance-company/edit/${row.original.id}`);
+        router.push(`/dashboard/master/company/edit/${row.original.id}`);
     }
 
     const handleDelete = async () => {
-        const result = await deleteFinanceCompany(row.original.id);
+        const result = await deleteCompany(row.original.id);
         if (result.success) {
             toast({ title: "Success", description: result.message });
             deleteRow(row.original.id);
@@ -62,7 +62,7 @@ export function DataTableRowActions({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently delete the company "{row.original.companyName}".
+                           This will permanently delete the company "{row.original.companyName}".
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

@@ -20,6 +20,19 @@ export async function getInsuranceCompanies() {
   }));
 }
 
+export async function getInsuranceCompanyById(id: string) {
+    const company = await prisma.insuranceCompany.findUnique({
+      where: { id }
+    });
+     if (!company) return null;
+
+    return {
+      ...company,
+      servicesOffered: company.servicesOffered.split(',').filter(s => s),
+    };
+}
+
+
 export async function addInsuranceCompany(
   data: z.infer<typeof insuranceCompanySchema>
 ) {

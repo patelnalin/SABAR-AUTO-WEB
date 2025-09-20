@@ -15,10 +15,6 @@ import {
   RowData,
   RowSelectionState
 } from "@tanstack/react-table";
-import { z } from "zod";
-import { branchSchema } from "./schema";
-import { editBranch } from "./actions";
-import { useToast } from "@/hooks/use-toast";
 
 import {
   Table,
@@ -52,13 +48,7 @@ import {
 
 declare module '@tanstack/react-table' {
   interface TableMeta<TData extends RowData> {
-    editingRowId: string | null;
-    setEditingRowId: React.Dispatch<React.SetStateAction<string | null>>;
-    editRow: (id: string) => void;
-    cancelEdit: () => void;
-    saveRow: (id: string) => void;
     deleteRow: (id: string) => void;
-    updateRow: (id: string, key: string, value: any) => void;
   }
 }
 
@@ -72,55 +62,19 @@ export function DataTable<TData extends Branch, TValue>({
   data: initialData,
 }: DataTableProps<TData, TValue>) {
   const [data, setData] = React.useState(initialData);
-  const [originalData, setOriginalData] = React.useState(initialData);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [editingRowId, setEditingRowId] = React.useState<string | null>(null);
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
-  const { toast } = useToast();
-
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
+ 
   React.useEffect(() => {
     setData(initialData);
-    setOriginalData(initialData);
   }, [initialData]);
 
   const tableMeta = React.useMemo(() => ({
-    editingRowId,
-    setEditingRowId,
-    editRow: (id: string) => {
-        setOriginalData(data); // Save current state before editing
-        setEditingRowId(id);
-    },
-    cancelEdit: () => {
-        setData(originalData); // Restore original data on cancel
-        setEditingRowId(null);
-    },
-    saveRow: async (id: string) => {
-        const rowToSave = data.find(row => row.id === id);
-        if (!rowToSave) return;
-        
-        const validatedData = branchSchema.safeParse(rowToSave);
-        if (!validatedData.success) {
-            toast({ title: "Validation Error", description: validatedData.error.errors.map(e => e.message).join(", "), variant: "destructive"});
-            return;
-        }
-
-        const result = await editBranch(id, validatedData.data);
-         if (result.success) {
-            toast({ title: "Success", description: result.message });
-        } else {
-            toast({ title: "Error", description: result.message, variant: "destructive" });
-            setData(originalData); // Restore on failed save
-        }
-        setEditingRowId(null);
-    },
     deleteRow: (id: string) => {
         setData(prev => prev.filter(row => row.id !== id));
     },
-    updateRow: (id: string, key: string, value: any) => {
-        setData(prev => prev.map(row => (row.id === id ? { ...row, [key]: value } : row)));
-    },
-  }), [editingRowId, data, originalData, toast]);
+  }), []);
 
   const table = useReactTable({
     data,

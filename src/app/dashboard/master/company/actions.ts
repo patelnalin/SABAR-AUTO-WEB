@@ -15,6 +15,12 @@ export async function getCompanies() {
   });
 }
 
+export async function getCompanyById(id: string) {
+    return await prisma.company.findUnique({
+      where: { id }
+    });
+}
+
 export async function addCompany(
   data: z.infer<typeof companySchema>
 ) {

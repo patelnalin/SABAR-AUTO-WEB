@@ -14,6 +14,12 @@ export async function getBranches() {
   });
 }
 
+export async function getBranchById(id: string) {
+    return await prisma.branch.findUnique({
+      where: { id }
+    });
+}
+
 export async function addBranch(
   data: z.infer<typeof branchSchema>
 ) {

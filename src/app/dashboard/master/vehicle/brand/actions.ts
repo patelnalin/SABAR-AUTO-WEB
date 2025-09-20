@@ -15,6 +15,12 @@ export async function getBrands() {
   });
 }
 
+export async function getBrandById(id: string) {
+    return await prisma.brand.findUnique({
+        where: { id }
+    });
+}
+
 export async function addBrand(
   data: z.infer<typeof brandSchema>
 ) {

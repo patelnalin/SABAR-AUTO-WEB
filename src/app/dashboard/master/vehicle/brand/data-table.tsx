@@ -15,11 +15,6 @@ import {
   RowData,
   RowSelectionState,
 } from "@tanstack/react-table";
-import { z } from "zod";
-import { brandSchema } from "./schema";
-import { editBrand } from "./actions";
-import { useToast } from "@/hooks/use-toast";
-
 import {
   Table,
   TableBody,
@@ -30,7 +25,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Trash } from "lucide-react";
+import { Search, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -40,17 +35,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Brand } from "./columns";
 
 declare module '@tanstack/react-table' {
   interface TableMeta<TData extends RowData> {
-    editingRowId: string | null;
-    setEditingRowId: React.Dispatch<React.SetStateAction<string | null>>;
-    editRow: (id: string) => void;
-    cancelEdit: () => void;
-    saveRow: (id: string) => void;
     deleteRow: (id: string) => void;
-    updateRow: (id: string, key: string, value: any) => void;
   }
 }
 
@@ -64,55 +60,19 @@ export function DataTable<TData extends Brand, TValue>({
   data: initialData,
 }: DataTableProps<TData, TValue>) {
   const [data, setData] = React.useState(initialData);
-  const [originalData, setOriginalData] = React.useState(initialData);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [editingRowId, setEditingRowId] = React.useState<string | null>(null);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
-  const { toast } = useToast();
-
+ 
   React.useEffect(() => {
     setData(initialData);
-    setOriginalData(initialData);
   }, [initialData]);
 
   const tableMeta = React.useMemo(() => ({
-    editingRowId,
-    setEditingRowId,
-    editRow: (id: string) => {
-        setOriginalData(JSON.parse(JSON.stringify(data))); // Deep copy for restoration
-        setEditingRowId(id);
-    },
-    cancelEdit: () => {
-        setData(originalData); // Restore original data on cancel
-        setEditingRowId(null);
-    },
-    saveRow: async (id: string) => {
-        const rowToSave = data.find(row => row.id === id);
-        if (!rowToSave) return;
-        
-        const validatedData = brandSchema.safeParse(rowToSave);
-        if (!validatedData.success) {
-            toast({ title: "Validation Error", description: validatedData.error.errors.map(e => e.message).join(", "), variant: "destructive"});
-            return;
-        }
-
-        const result = await editBrand(id, validatedData.data);
-         if (result.success) {
-            toast({ title: "Success", description: result.message });
-        } else {
-            toast({ title: "Error", description: result.message, variant: "destructive" });
-            setData(originalData); // Restore on failed save
-        }
-        setEditingRowId(null);
-    },
     deleteRow: (id: string) => {
         setData(prev => prev.filter(row => row.id !== id));
     },
-    updateRow: (id: string, key: string, value: any) => {
-        setData(prev => prev.map(row => (row.id === id ? { ...row, [key]: value } : row)));
-    },
-  }), [editingRowId, data, originalData, toast]);
+  }), []);
 
   const table = useReactTable({
     data,
@@ -134,14 +94,8 @@ export function DataTable<TData extends Brand, TValue>({
 
   return (
     <div className="border border-gray-300 rounded-sm">
-        <div className="bg-gray-100 dark:bg-gray-800 p-2 border-b border-gray-300 text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center justify-between">
-            <span>Brand Records</span>
-            {table.getFilteredSelectedRowModel().rows.length > 0 && (
-                <Button variant="destructive" size="sm">
-                    <Trash className="mr-2 h-4 w-4" />
-                    Delete ({table.getFilteredSelectedRowModel().rows.length})
-                </Button>
-            )}
+        <div className="bg-gray-100 dark:bg-gray-800 p-2 border-b border-gray-300 text-sm font-semibold text-gray-700 dark:text-gray-200">
+            Brand Records
         </div>
         <div className="flex items-center gap-2 p-2">
             <div className="relative w-full sm:max-w-xs">
@@ -152,12 +106,12 @@ export function DataTable<TData extends Brand, TValue>({
                     onChange={(event) =>
                         table.getColumn("brandName")?.setFilterValue(event.target.value)
                     }
-                    className="pl-8"
+                    className="pl-8 h-8"
                 />
             </div>
              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="ml-auto">
+                    <Button variant="outline" className="ml-auto h-8">
                     Status
                     </Button>
                 </DropdownMenuTrigger>
@@ -237,27 +191,50 @@ export function DataTable<TData extends Brand, TValue>({
         </Table>
       </div>
       <div className="flex items-center justify-between p-2 border-t border-gray-300 bg-gray-100 dark:bg-gray-800 text-xs">
-        <div className="flex-1 text-muted-foreground">
+        <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <div className="flex items-center space-x-2">
-            <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+        <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Rows per page:</span>
+            <Select
+                value={`${table.getState().pagination.pageSize}`}
+                onValueChange={(value) => {
+                    table.setPageSize(Number(value));
+                }}
             >
-            Previous
+                <SelectTrigger className="h-7 w-[70px]">
+                    <SelectValue placeholder={table.getState().pagination.pageSize} />
+                </SelectTrigger>
+                <SelectContent>
+                    {[10, 25, 50].map((pageSize) => (
+                        <SelectItem key={pageSize} value={`${pageSize}`}>
+                            {pageSize}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+        <div className="text-muted-foreground">
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+        </div>
+        <div className="flex items-center space-x-1">
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
+                <ChevronsLeft className="h-4 w-4" />
             </Button>
-            <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            >
-            Next
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                <ChevronLeft className="h-4 w-4" />
             </Button>
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>
+                <ChevronsRight className="h-4 w-4" />
+            </Button>
+        </div>
+         <div className="text-muted-foreground">
+            Showing {table.getRowModel().rows.length > 0 ? table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 : 0}-
+            {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of {table.getFilteredRowModel().rows.length}
         </div>
       </div>
     </div>
