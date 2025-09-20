@@ -4,89 +4,84 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { financialYearSchema } from "./schema";
-
-// This is a mock database.
-const MOCK_YEARS = [
-    {
-        id: "fy_1",
-        yearName: "2024-2025",
-        startDate: new Date("2024-04-01"),
-        endDate: new Date("2025-03-31"),
-        status: "Active",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        id: "fy_2",
-        yearName: "2023-2024",
-        startDate: new Date("2023-04-01"),
-        endDate: new Date("2024-03-31"),
-        status: "Inactive",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-];
-
-let financialYears = [...MOCK_YEARS];
+import { prisma } from "@/lib/prisma";
 
 // Helper to ensure only one year is active
-const enforceSingleActiveYear = (newYear: z.infer<typeof financialYearSchema>, idToExclude?: string) => {
-    if (newYear.status === 'Active') {
-        financialYears = financialYears.map(year => {
-            if (year.id !== idToExclude) {
-                return { ...year, status: 'Inactive' as 'Inactive' };
-            }
-            return year;
-        });
+const enforceSingleActiveYear = async (newYearData: z.infer<typeof financialYearSchema>, idToExclude?: string) => {
+    if (newYearData.status === 'Active') {
+        const updateData: { where: any, data: any } = {
+            where: {
+                status: 'Active',
+            },
+            data: {
+                status: 'Inactive',
+            },
+        };
+        if (idToExclude) {
+            updateData.where.NOT = {
+                id: idToExclude,
+            };
+        }
+        await prisma.financialYear.updateMany(updateData);
     }
 };
 
 export async function getFinancialYears() {
-  return Promise.resolve(financialYears);
+  return await prisma.financialYear.findMany({
+      orderBy: {
+          startDate: 'desc'
+      }
+  });
 }
 
 export async function addFinancialYear(
   data: z.infer<typeof financialYearSchema>
 ) {
-    if (financialYears.some(year => year.yearName === data.yearName)) {
+    const existing = await prisma.financialYear.findFirst({ where: { yearName: data.yearName }});
+    if (existing) {
         return { success: false, message: "Financial year name must be unique." };
     }
     
-    enforceSingleActiveYear(data);
+    await enforceSingleActiveYear(data);
     
-    const newYear = {
-        id: `fy_${Date.now()}`,
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    };
-    financialYears.push(newYear);
-    revalidatePath("/dashboard/master/year");
-    return { success: true, message: "Financial year added successfully." };
+    try {
+      await prisma.financialYear.create({ data });
+      revalidatePath("/dashboard/master/year");
+      return { success: true, message: "Financial year added successfully." };
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: "Failed to add financial year." };
+    }
 }
 
 export async function editFinancialYear(
   id: string,
   data: z.infer<typeof financialYearSchema>
 ) {
-  const index = financialYears.findIndex((y) => y.id === id);
-  if (index === -1) {
-    return { success: false, message: "Financial year not found." };
-  }
-
-  if (financialYears.some(year => year.yearName === data.yearName && year.id !== id)) {
+  const existing = await prisma.financialYear.findFirst({ where: { yearName: data.yearName, NOT: { id } }});
+  if (existing) {
         return { success: false, message: "Financial year name must be unique." };
     }
 
-  enforceSingleActiveYear(data, id);
+  await enforceSingleActiveYear(data, id);
   
-  financialYears[index] = { ...financialYears[index], ...data, updatedAt: new Date() };
-  revalidatePath("/dashboard/master/year");
-  return { success: true, message: "Financial year updated successfully." };
+  try {
+    await prisma.financialYear.update({ where: { id }, data });
+    revalidatePath("/dashboard/master/year");
+    return { success: true, message: "Financial year updated successfully." };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Failed to update financial year." };
+  }
 }
 
 export async function deleteFinancialYear(id: string) {
-  financialYears = financialYears.filter((y) => y.id !== id);
-  revalidatePath("/dashboard/master/year");
-  return { success: true, message: "Financial year deleted successfully." };
+  try {
+    await prisma.financialYear.delete({ where: { id } });
+    revalidatePath("/dashboard/master/year");
+    return { success: true, message: "Financial year deleted successfully." };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Failed to delete financial year." };
+  }
 }

@@ -4,91 +4,71 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { insuranceCompanySchema } from "./schema";
+import { prisma } from "@/lib/prisma";
 
-// This is a mock database.
-const MOCK_DATA = [
-  {
-    id: "ic_1",
-    companyName: "HDFC ERGO General Insurance",
-    companyCode: "HDFC01",
-    registrationNumber: "IRDAI Reg. No. 146",
-    licenseNumber: "LIC-12345",
-    contactPerson: "Rajesh Kumar",
-    contactNumber: "9876543210",
-    email: "support@hdfcergo.com",
-    website: "https://www.hdfcergo.com",
-    headOfficeAddress: "1st Floor, HDFC House, Backbay Reclamation, H. T. Parekh Marg, Churchgate",
-    city: "Mumbai",
-    state: "Maharashtra",
-    pinCode: "400020",
-    branchesCount: 200,
-    servicesOffered: ["Health", "Motor", "Travel", "Property"],
-    status: "Active",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "ic_2",
-    companyName: "Bajaj Allianz General Insurance",
-    companyCode: "BAJAJ01",
-    registrationNumber: "IRDAI Reg. No. 113",
-    licenseNumber: "LIC-54321",
-    contactPerson: "Sunita Sharma",
-    contactNumber: "9123456789",
-    email: "customercare@bajajallianz.co.in",
-    website: "https://www.bajajallianz.com",
-    headOfficeAddress: "GE Plaza, Airport Road, Yerawada",
-    city: "Pune",
-    state: "Maharashtra",
-    pinCode: "411006",
-    branchesCount: 250,
-    servicesOffered: ["Health", "Motor", "Life"],
-    status: "Active",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-];
-
-let companies = [...MOCK_DATA];
 
 export async function getInsuranceCompanies() {
-  return Promise.resolve(companies);
+  const companies = await prisma.insuranceCompany.findMany({
+      orderBy: {
+          companyName: 'asc'
+      }
+  });
+
+  return companies.map(company => ({
+      ...company,
+      servicesOffered: company.servicesOffered.split(',').filter(s => s),
+  }));
 }
 
 export async function addInsuranceCompany(
   data: z.infer<typeof insuranceCompanySchema>
 ) {
-  if (companies.some(c => c.companyCode === data.companyCode)) {
-      return { success: false, message: "Company code must be unique." };
-  }
-  const newItem = {
-    id: `ic_${Date.now()}`,
+  const dataWithServicesAsString = {
     ...data,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    servicesOffered: data.servicesOffered.join(','),
   };
-  companies.push(newItem);
-  revalidatePath("/dashboard/master/insurance-company");
-  return { success: true, message: "Insurance company added successfully." };
+
+  try {
+    await prisma.insuranceCompany.create({ data: dataWithServicesAsString });
+    revalidatePath("/dashboard/master/insurance-company");
+    return { success: true, message: "Insurance company added successfully." };
+  } catch (error) {
+    if ((error as any).code === 'P2002' && (error as any).meta?.target?.includes('companyCode')) {
+      return { success: false, message: "Company code must be unique." };
+    }
+    console.error(error);
+    return { success: false, message: "Failed to add insurance company." };
+  }
 }
 
 export async function editInsuranceCompany(
   id: string,
   data: z.infer<typeof insuranceCompanySchema>
 ) {
-  const index = companies.findIndex((item) => item.id === id);
-  if (index === -1) {
-    return { success: false, message: "Record not found." };
+  const dataWithServicesAsString = {
+    ...data,
+    servicesOffered: data.servicesOffered.join(','),
+  };
+
+  try {
+    await prisma.insuranceCompany.update({ where: { id }, data: dataWithServicesAsString });
+    revalidatePath("/dashboard/master/insurance-company");
+    return { success: true, message: "Record updated successfully." };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Failed to update record." };
   }
-  companies[index] = { ...companies[index], ...data, updatedAt: new Date() };
-  revalidatePath("/dashboard/master/insurance-company");
-  return { success: true, message: "Record updated successfully." };
 }
 
 export async function deleteInsuranceCompany(id: string) {
-  companies = companies.filter((item) => item.id !== id);
-  revalidatePath("/dashboard/master/insurance-company");
-  return { success: true, message: "Record deleted successfully." };
+  try {
+    await prisma.insuranceCompany.delete({ where: { id } });
+    revalidatePath("/dashboard/master/insurance-company");
+    return { success: true, message: "Record deleted successfully." };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Failed to delete record." };
+  }
 }
 
 export async function getStates() {
