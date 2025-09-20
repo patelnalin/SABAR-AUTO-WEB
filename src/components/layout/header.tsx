@@ -76,6 +76,7 @@ export default function Header() {
                         <MenubarItem asChild><Link href="/dashboard/account/sales">Sales Dashboard</Link></MenubarItem>
                         <MenubarItem asChild><Link href="/dashboard/account/sales/enquiry">Enquiry</Link></MenubarItem>
                         <MenubarItem asChild><Link href="/dashboard/account/sales/saleschallan">Sales Challan</Link></MenubarItem>
+                        <MenubarItem asChild><Link href="/dashboard/account/sales/meetarbill">Meetar Bill</Link></MenubarItem>
                     </MenubarSubContent>
                 </MenubarSub>
                  <MenubarSub>
