@@ -1,29 +1,18 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.1.x"]
+}
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-model User {
-  id          String   @id @default(uuid())
-  fullName    String
-  email       String   @unique
-  phoneNumber String
-  password    String
-  role        String   // Admin, User, Manager
-  department  String   // HR, Sales, IT, etc.
-  branch      String
-  status      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
 model Company {
-  id                 String  @id @default(uuid())
+  id                 String @id @default(uuid())
   companyName        String
   registrationNumber String?
   gstNumber          String?
@@ -33,30 +22,32 @@ model Company {
   state              String
   country            String
   pincode            String
-  email              String  @unique
+  email              String @unique
   phone              String
   website            String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Branch {
-  id           String  @id @default(uuid())
-  branchCode   String  @unique
-  branchName   String
-  address      String
-  city         String
-  state        String
-  pincode      String
-  phone        String
-  email        String  @unique
-  managerName  String?
-  openingHours String?
-  gstin        String?
-  bankAccount  String?
-  activeStatus Boolean @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String  @id @default(uuid())
+  branchCode          String  @unique
+  branchName          String
+  address             String
+  city                String
+  state               String
+  pincode             String
+  phone               String
+  email               String  @unique
+  managerName         String?
+  openingHours        String?
+  gstin               String?
+  bankAccount         String?
+  activeStatus        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Supplier {
@@ -70,9 +61,10 @@ model Supplier {
   state         String
   pincode       String
   gstin         String?
-  status        String // Active, Inactive
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  status        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Brand {
@@ -81,107 +73,119 @@ model Brand {
   countryOfOrigin     String
   establishedYear     Int
   headquarterLocation String?
-  status              String // Active, Inactive
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  status              String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Model {
-    id                  String  @id @default(uuid())
-    modelCode           String @unique
-    modelName           String
-    brandName           String
-    fuelType            String
-    seatingCapacity     Int?
-    engineCapacity      Int?
-    transmissionType    String
-    priceRange          String?
-    launchYear          Int
-    status              String // Active, Inactive
-    createdAt           DateTime @default(now())
-    updatedAt           DateTime @updatedAt
+  id                String   @id @default(uuid())
+  modelCode         String   @unique
+  modelName         String
+  brandName         String
+  fuelType          String
+  seatingCapacity   Int?
+  engineCapacity    Int?
+  transmissionType  String
+  priceRange        String?
+  launchYear        Int
+  status            String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Color {
-    id          String  @id @default(uuid())
-    colorName   String  @unique
-    colorCode   String?
-    finishType  String
-    status      String // Active, Inactive
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id String @id @default(uuid())
+    colorName String
+    colorCode String?
+    finishType String
+    status String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Address {
-    id          String  @id @default(uuid())
-    village     String
-    post        String
-    city        String
-    state       String
-    pincode     String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id String @id @default(uuid())
+    village String
+    post String
+    city String
+    state String
+    pincode String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model FinancialYear {
-    id          String  @id @default(uuid())
-    yearName    String  @unique
-    startDate   DateTime
-    endDate     DateTime
-    status      String // Active, Inactive
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id String @id @default(uuid())
+    yearName String @unique
+    startDate DateTime
+    endDate DateTime
+    status String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
-model InsurancePolicy {
-  id                  String    @id @default(uuid())
-  policyNumber        String    @unique
-  policyType          String
-  insuranceCompany    String
-  policyHolderName    String
-  phoneNumber         String
-  email               String?
-  startDate           DateTime
-  endDate             DateTime
-  premiumAmount       Float
-  sumInsured          Float?
-  paymentMode         String
-  agentName           String?
-  renewalReminderDate DateTime?
-  renewalStatus       String
-  notes               String?
-  status              String
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+model InsuranceCompany {
+    id                  String   @id @default(uuid())
+    companyName         String
+    companyCode         String   @unique
+    registrationNumber  String?
+    licenseNumber       String?
+    contactPerson       String?
+    contactNumber       String
+    email               String
+    website             String?
+    headOfficeAddress   String?
+    city                String
+    state               String
+    pinCode             String
+    branchesCount       Int?
+    servicesOffered     String
+    status              String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
-model Payment {
-  id                 String    @id @default(uuid())
-  paymentType        String
-  paymentDate        DateTime
-  customerName       String
-  vehicleModel       String?
-  chassisNo          String?
-  engineNo           String?
-  amount             Float
-  paymentMode        String
-  transactionId      String?
-  chequeNumber       String?
-  paymentStatus      String
-  policyOrFileNo     String?
-  expiryDate         DateTime?
-  companyOrAuthority String?
-  invoiceNumber      String
-  balanceDue         Float?
-  notes              String?
-  createdBy          String
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+model FinanceCompany {
+    id                  String   @id @default(uuid())
+    companyName         String
+    registrationNumber  String?
+    licenseType         String
+    panNumber           String?
+    gstNumber           String?
+    incorporationDate   DateTime?
+
+    contactPersonName       String?
+    contactPersonDesignation String?
+    mobileNumber        String
+    alternatePhoneNumber String?
+    email               String
+    website             String?
+
+    headOfficeAddress   String
+    city                String
+    state               String
+    pinCode             String
+    country             String
+
+    branchCount         Int?
+    status              String
+    notes               String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
+
 
 model Voucher {
-  id            String    @id @default(uuid())
-  voucherNumber String    @unique
+  id            String   @id @default(uuid())
+  voucherNumber String
   voucherDate   DateTime
   voucherType   String
   accountName   String
@@ -192,205 +196,90 @@ model Voucher {
   status        String
   approvedBy    String?
   createdBy     String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
-
-model PurchaseOrder {
-  id               String                 @id @default(uuid())
-  poNumber         String                 @unique
-  poDate           DateTime
-  branch           String
-  supplierName     String
-  invoiceNo        String?
-  invoiceDate      DateTime?
-  withWithoutForm  String?
-  transporter      String?
-  truckNo          String?
-  mobileNo         String?
-  billAmt          Float?
-  lineItems        PurchaseOrderLineItem[]
-  subtotal         Float?
-  sgst             Float?
-  cgst             Float?
-  grandTotal       Float?
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
+model Payment {
+    id String @id @default(uuid())
+    paymentType String
+    paymentDate DateTime
+    customerName String
+    vehicleModel String?
+    chassisNo String?
+    engineNo String?
+    amount Float
+    paymentMode String
+    transactionId String?
+    chequeNumber String?
+    paymentStatus String
+    policyOrFileNo String?
+    expiryDate DateTime?
+    companyOrAuthority String?
+    invoiceNumber String
+    balanceDue Float?
+    notes String?
+    createdBy String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
-model PurchaseOrderLineItem {
-  id              String         @id @default(uuid())
-  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
-  purchaseOrderId String?
-  modelCode       String
-  modelName       String
-  color           String
-  hsnCode         String?
-  quantity        Int
-  rate            Float
-  discount        Float
-  amount          Float
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-}
+model InsurancePolicy {
+  id                 String   @id @default(uuid())
+  policyNumber       String   @unique
+  policyType         String
+  insuranceCompany   String
+  policyHolderName   String
+  phoneNumber        String
+  email              String?
+  startDate          DateTime
+  endDate            DateTime
+  premiumAmount      Float
+  sumInsured         Float?
+  paymentMode        String
+  agentName          String?
+  renewalReminderDate DateTime?
+  notes              String?
+  status             String
+  renewalStatus      String
 
-
-model PurchaseInvoice {
-  id              String                 @id @default(uuid())
-  invoiceNumber   String                 @unique
-  invoiceDate     DateTime
-  supplierName    String
-  poNumber        String?
-  branch          String
-  grnNumber       String?
-  contactPerson   String?
-  paymentTerms    String
-  deliveryAddress String
-  currency        String
-  status          String
-  lineItems       PurchaseInvoiceLineItem[]
-  subtotal        Float
-  totalDiscount   Float
-  sgst            Float
-  cgst            Float
-  shippingCharges Float                  @default(0)
-  grandTotal      Float
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-}
-
-model PurchaseInvoiceLineItem {
-  id                String           @id @default(uuid())
-  purchaseInvoice   PurchaseInvoice? @relation(fields: [purchaseInvoiceId], references: [id])
-  purchaseInvoiceId String?
-  modelCode         String
-  modelName         String
-  hsnCode           String?
-  color             String
-  chassisNumber     String
-  engineNumber      String
-  quantity          Int
-  rate              Float
-  discount          Float
-  amount            Float
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-}
-
-model GRN {
-  id          String    @id @default(uuid())
-  grnNumber   String    @unique
-  grnDate     DateTime
-  poNumber    String
-  branch      String
-  supplierName String
-  invoiceNo   String?
-  invoiceDate DateTime?
-  truckNo     String?
-  lrNo        String?
-  items       GRNItem[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
-
-model GRNItem {
-  id        String  @id @default(uuid())
-  grn       GRN?    @relation(fields: [grnId], references: [id])
-  grnId     String?
-  modelCode String
-  modelName String
-  hsnCode   String?
-  color     String
-  chassisNo String
-  engineNo  String
-  rate      Float
-  qty       Int
-  discount  Float
-  igst      Float
-  amount    Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model MeetarBill {
-    id            String @id @default(uuid())
-    billDate      DateTime
-    customerName  String
-    mobile        String
-    village       String
-    city          String
-    vehicleModel  String
-    chassisNo     String
-    engineNo      String
+    id String @id @default(uuid())
+    billDate DateTime
+    customerName String
+    mobile String
+    village String
+    city String
+    vehicleModel String
+    chassisNo String
+    engineNo String
     certificateNo String
-    meterNo       String?
-    products      MeetarBillProduct[]
-    totalAmount   Float
-    discount      Float
-    sgst          Float
-    cgst          Float
-    grandTotal    Float
-    amount        Float
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+    meterNo String?
+    totalAmount Float
+    discount Float
+    sgst Float
+    cgst Float
+    grandTotal Float
+    amount Float
+    products MeetarBillProduct[]
+    
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model MeetarBillProduct {
-    id          String      @id @default(uuid())
-    meetarBill  MeetarBill? @relation(fields: [meetarBillId], references: [id])
-    meetarBillId String?
+    id String @id @default(uuid())
     productName String
-    qty         Int
-    rate        Float
-    amount      Float
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-}
+    qty Int
+    rate Float
+    amount Float
+    bill MeetarBill @relation(fields: [meetarBillId], references: [id], onDelete: Cascade)
+    meetarBillId String
 
-model InsuranceCompany {
-  id                  String    @id @default(uuid())
-  companyName         String    @unique
-  companyCode         String    @unique
-  registrationNumber  String?
-  licenseNumber       String?
-  contactPerson       String?
-  contactNumber       String
-  email               String
-  website             String?
-  headOfficeAddress   String?
-  city                String
-  state               String
-  pinCode             String
-  branchesCount       Int?
-  servicesOffered   String
-  status            String
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-}
-
-model FinanceCompany {
-    id                      String    @id @default(uuid())
-    companyName             String    @unique
-    registrationNumber      String?
-    licenseType             String
-    panNumber               String?
-    gstNumber               String?
-    incorporationDate       DateTime?
-    contactPersonName       String?
-    contactPersonDesignation String?
-    mobileNumber            String
-    alternatePhoneNumber    String?
-    email                   String
-    website                 String?
-    headOfficeAddress       String
-    city                    String
-    state                   String
-    pinCode                 String
-    country                 String
-    branchCount             Int?
-    status                  String
-    notes                   String?
-    createdAt               DateTime  @default(now())
-    updatedAt               DateTime  @updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
