@@ -19,6 +19,12 @@ import {
 import { FinanceCompany } from "../../columns";
 import { Skeleton } from "@/components/ui/skeleton";
 
+
+export async function generateStaticParams() {
+    return [];
+}
+
+
 export default function EditFinanceCompanyPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const { toast } = useToast();

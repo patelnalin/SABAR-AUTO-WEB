@@ -19,15 +19,18 @@ import {
 import { Supplier } from "../../columns";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function EditSupplierPage({ params }: { params: Promise<{ id: string }> }) {
+
+export async function generateStaticParams() {
+    return [];
+}
+
+export default function EditSupplierPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [supplier, setSupplier] = useState<Supplier | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    
-    // Correctly unwrap the params promise with React.use()
-    const { id } = React.use(params);
+    const id = params.id;
 
     useEffect(() => {
         const fetchSupplier = async () => {

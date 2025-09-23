@@ -19,6 +19,13 @@ import {
 import { Branch } from "../../columns";
 import { Skeleton } from "@/components/ui/skeleton";
 
+export async function generateStaticParams() {
+    // In a real app, you would fetch all branch IDs from the database.
+    // For now, we return an empty array as there's no data to pre-render.
+    return [];
+}
+
+
 export default function EditBranchPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const { toast } = useToast();

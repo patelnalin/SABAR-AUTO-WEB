@@ -1,6 +1,5 @@
 
-"use client";
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,37 +9,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { MOCK_BILLS } from "./data";
+import { getBills } from "./actions";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 
-export default function MeetarBillPage() {
-    const router = useRouter();
+export default async function MeetarBillPage() {
+    const bills = await getBills();
 
-    const handleAddNew = () => {
-        router.push("/dashboard/account/sales/meetarbill/add");
-    }
-
-  return (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <CardTitle>Meetar Bill Details</CardTitle>
-            <CardDescription>
-              Manage, view, and create new Meetar bills.
-            </CardDescription>
-          </div>
-          <Button onClick={handleAddNew} className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Bill
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <DataTable columns={columns} data={MOCK_BILLS} />
-      </CardContent>
-    </Card>
-  );
+    return (
+        <Card className="shadow-lg">
+            <CardHeader>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <CardTitle>Meetar Bill Details</CardTitle>
+                        <CardDescription>
+                            Manage, view, and create new Meetar bills.
+                        </CardDescription>
+                    </div>
+                    <Button asChild className="w-full sm:w-auto">
+                        <Link href="/dashboard/account/sales/meetarbill/add">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add New Bill
+                        </Link>
+                    </Button>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <DataTable columns={columns} data={bills} />
+            </CardContent>
+        </Card>
+    );
 }
